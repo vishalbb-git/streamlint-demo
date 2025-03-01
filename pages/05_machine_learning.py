@@ -80,7 +80,7 @@ st.header("1. Data Selection and Exploration")
 
 dataset_options = {
     "Iris Dataset": "https://raw.githubusercontent.com/mwaskom/seaborn-data/master/iris.csv",
-    "Wine Quality Dataset": "https://raw.githubusercontent.com/uciml/dataset/master/wine.data",
+    "Wine Quality Dataset": "https://raw.githubusercontent.com/tirthajyoti/Machine-Learning-with-Python/refs/heads/master/Datasets/wine.data.csv",
     "Breast Cancer Dataset": "https://raw.githubusercontent.com/selva86/datasets/master/BreastCancer.csv"
 }
 
