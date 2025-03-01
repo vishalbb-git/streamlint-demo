@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
 import requests
 import io
 from sklearn.model_selection import train_test_split
@@ -13,6 +12,64 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.decomposition import PCA
 import time
+
+# Try importing seaborn, but provide a fallback
+try:
+    import seaborn as sns
+    seaborn_available = True
+except ImportError:
+    seaborn_available = False
+    st.warning("📊 Seaborn library is not installed. Some visualizations will be limited. To install it, run: `pip install seaborn`")
+    # Define a simple replacement for sns.heatmap
+    class SimpleSns:
+        def heatmap(self, data, annot=True, cmap='coolwarm', ax=None):
+            if ax is None:
+                _, ax = plt.subplots()
+            im = ax.imshow(data, cmap=cmap)
+            plt.colorbar(im, ax=ax)
+            
+            # Add annotations
+            if annot:
+                for i in range(data.shape[0]):
+                    for j in range(data.shape[1]):
+                        ax.text(j, i, f"{data.iloc[i, j]:.2f}", 
+                                ha="center", va="center", color="black")
+            
+            ax.set_xticks(np.arange(len(data.columns)))
+            ax.set_yticks(np.arange(len(data.index)))
+            ax.set_xticklabels(data.columns)
+            ax.set_yticklabels(data.index)
+            plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
+            return ax
+            
+        def kdeplot(self, data, label=None, ax=None):
+            if ax is None:
+                _, ax = plt.subplots()
+            ax.hist(data, density=True, alpha=0.5, label=label)
+            return ax
+            
+        def barplot(self, x, y, data, ax=None):
+            if ax is None:
+                _, ax = plt.subplots()
+            ax.bar(data[x], data[y])
+            return ax
+            
+        def pairplot(self, data, vars=None, hue=None):
+            fig, ax = plt.subplots(len(vars), len(vars), figsize=(10, 10))
+            for i, vi in enumerate(vars):
+                for j, vj in enumerate(vars):
+                    if i == j:  # Diagonal: histograms
+                        ax[i, j].hist(data[vi], alpha=0.5)
+                        ax[i, j].set_xlabel(vi)
+                    else:  # Off-diagonal: scatter plots
+                        ax[i, j].scatter(data[vj], data[vi], alpha=0.5)
+                        ax[i, j].set_xlabel(vj)
+                        ax[i, j].set_ylabel(vi)
+            fig.tight_layout()
+            return fig
+    
+    # Create a simple replacement for seaborn
+    sns = SimpleSns()
 
 st.set_page_config(page_title="Machine Learning Demo", page_icon="🤖", layout="wide")
 st.title("🤖 Machine Learning Demonstration")
