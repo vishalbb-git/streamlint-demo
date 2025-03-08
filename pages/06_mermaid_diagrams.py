@@ -16,15 +16,36 @@ Generate various types of diagrams using Mermaid syntax. You can either type dir
 st.subheader("More about Mermaid")
 st.markdown("[Visit Mermaid Documentation](https://mermaid.js.org/intro/)")
 
+# Initialize session state for change tracking
+if 'has_changes' not in st.session_state:
+    st.session_state.has_changes = False
+if 'previous_mermaid_code' not in st.session_state:
+    st.session_state.previous_mermaid_code = ""
+
+# Add navigation warning if changes detected
+if st.session_state.has_changes:
+    st.markdown("""
+        <script>
+            window.onbeforeunload = function(e) {
+                e = e || window.event;
+                e.preventDefault();
+                if (e) {
+                    e.returnValue = '';
+                }
+                return '';
+            };
+        </script>
+    """, unsafe_allow_html=True)
+
 # Add file uploader
 uploaded_file = st.file_uploader("Upload a Mermaid file (.mmd)", type=['mmd'])
-
 
 # Initialize or update mermaid_code based on file upload
 initial_value = ""
 output_filename = "diagram"  # default filename
 
 if uploaded_file:
+    st.session_state.has_changes = True
     initial_value = uploaded_file.getvalue().decode()
     # Get original filename without extension
     output_filename = os.path.splitext(uploaded_file.name)[0]
@@ -34,10 +55,16 @@ mermaid_code = st_ace(
     value=initial_value,
     height=400,
     theme="github",
-    show_gutter=True,
+    show_gutter=True
 )
 
+# Check if mermaid code has changed
+if mermaid_code != st.session_state.previous_mermaid_code:
+    st.session_state.has_changes = True
+st.session_state.previous_mermaid_code = mermaid_code
+
 if st.button("Generate SVG"):
+    st.session_state.has_changes = False
     with tempfile.NamedTemporaryFile(suffix='.mmd', mode='w', delete=False) as f:
         f.write(mermaid_code)
         temp_mmd = f.name
